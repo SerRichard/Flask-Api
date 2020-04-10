@@ -1,0 +1,95 @@
+
+from flask import Flask, request, jsonify
+from cassandra.cluster import Cluster
+from passlib.apps import custom_app_context as pwd_context
+from flask_httpauth import HTTPBasicAuth
+from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
+import json
+import requests
+cluster = Cluster(contact_points=['3.94.212.6'],port=9042)
+session = cluster.connect()
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'foxes in the night will poop for a rasberry'
+
+db = SQLAlchemy(app)
+auth = HTTPBasicAuth()
+
+def hash_password(password):
+	password_hash = pwd_context.encrypt(password)
+	return(password_hash)
+
+def generate_auth_token(usern, hashp, expiration=600):
+	s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
+	return s.dumps({usern:hashp})
+
+@app.route('/')
+def hello():
+	return('<h1>Hello, and welcome to my restful c02 app: Visit /register to register<h1>')
+
+@app.route('/register', methods=['POST'])
+def new_user():
+	usern = request.json['username']
+	hashp = hash_password(request.json['password'])
+	if usern is None or hashp is None:
+		return({'error':'you have missed arguments'}), 400 #missing args
+	row = session.execute("""SELECT count(*) FROM c02.userdb WHERE username='{}'""".format(usern))
+	getit = [item[0] for item in row]
+	if getit[0]>0:
+		return({'error':'user already exists'}), 400  #existing user
+	else:
+		session.execute("""INSERT INTO c02.userdb (id,username,password_hash) VALUES(now(),'{}','{}')""".format(request.json['username'],hashp))
+	return jsonify({usern:': has been registered'}),201
+
+@app.route('/token', methods=['GET'])
+def get_auth_token():
+	usern = request.json['username']
+	row = session.execute("""SELECT password_hash FROM c02.userdb WHERE username='{}'""".format(usern))
+	hashp = [item[0] for item in row]
+	newhash = hash_password(request.json['password'])
+	print(hashp)
+	print(newhash)
+	if newhash == hashp:
+		token = generate_auth_token(usern,hashp,600)
+		return jsonify({'token': token.decode('ascii')})
+	else:
+		return({'error':'incorrect password'}), 400 #incorrect password
+
+
+
+@app.route('/postcode', methods=['GET'])
+def profile():
+	tuples = session.execute("""Select * From c02.stats""")
+	results = []
+	for x in tuples:
+		results.append({"regionid":x.regionid,"name":x.name,"postcode":x.postcode,"forecast":x.forecast,"indx":x.indx,"date":x.date})
+	return jsonify(results)
+
+@app.route('/<postcode>', methods=['GET'])
+def external_postcode(postcode):
+	c02_postcode_template = 'https://api.carbonintensity.org.uk/regional/postcode/{pstcd}'
+	resp = requests.get(c02_postcode_template.format(pstcd = postcode))
+	if resp.ok:
+		c02 = resp.json()
+		return jsonify(c02)
+	else:
+		print(resp.reason)
+
+@app.route('/postcode', methods=['POST'])
+def create():
+	session.execute("""INSERT INTO c02.stats(regionid,name,postcode,forecast,indx,date) VALUES({},'{}','{}','{}','{}','{}')""".format(int(request.json['regionid']),request.json['name'],request.json['postcode'],request.json['forecast'],request.json['indx'],request.json['date']))
+	return jsonify({'message': 'created: /record/{}'.format(request.json['postcode'])}), 201
+
+@app.route('/postcode', methods=['PUT'])
+def update():
+	session.execute("""UPDATE c02.stats SET forecast= '{}', indx= '{}', date= '{}' WHERE postcode= '{}'""".format(request.json['forecast'],request.json['indx'],request.json['date'],request.json['postcode']))
+	return jsonify({'message': 'updated: /record/{}'.format(request.json['postcode'])}), 200
+
+@app.route('/postcode', methods=['DELETE'])
+def delete():
+	session.execute("""DELETE FROM c02.stats WHERE postcode='{}'""".format(request.json['postcode']))
+	return jsonify({'message': 'deleted: /records/{}'.format(request.json['postcode'])}), 200
+
+if __name__ == '__main__':
+	app.run(host='0.0.0.0',port=80)
+
