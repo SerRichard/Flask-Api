@@ -9,7 +9,7 @@ from passlib.apps import custom_app_context as pwd_context
 from flask_httpauth import HTTPBasicAuth
 from itsdangerous import (TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired)
 
-cluster = Cluster(contact_points=['54.167.248.218'],port=9042)
+cluster = Cluster(contact_points=['18.232.62.164'],port=9042)
 session = cluster.connect()
 
 app = Flask(__name__)
@@ -79,18 +79,11 @@ def new_user():
 	return (jsonify({user.username:'User registered'}), 201,
 		{'Location': url_for('get_user', id=user.id, _external=True)})
 
-@app.route('/api/users/<int:id>')
-def get_user(id):
-    user = User.query.get(id)
-    if not user:
-        abort(400)
-    return jsonify({'username': user.username})
-
-@app.route('/token')
+@app.route('/token', methods=['GET'])
 @auth.login_required
 def get_auth_token():
-	token = g.user.generate_auth_token(600)
-	return jsonify({'token':token.decode('ascii'), 'duration': 600 })
+	token = g.user.generate_auth_token(1800)
+	return jsonify({'token':token.decode('ascii'), 'duration': 1800 }), 200
 
 @app.route('/postcode', methods=['GET'])
 def profile():
@@ -98,7 +91,7 @@ def profile():
 	results = []
 	for x in tuples:
 		results.append({"regionid":x.regionid,"name":x.name,"postcode":x.postcode,"forecast":x.forecast,"indx":x.indx,"date":x.date})
-	return jsonify(results)
+	return jsonify(results), 200
 
 @app.route('/<postcode>', methods=['GET'])
 def external_postcode(postcode):
@@ -106,9 +99,9 @@ def external_postcode(postcode):
 	resp = requests.get(c02_postcode_template.format(pstcd = postcode))
 	if resp.ok:
 		c02 = resp.json()
-		return jsonify(c02)
+		return jsonify(c02), 200
 	else:
-		print(resp.reason)
+		print(resp.reason), 400
 
 @app.route('/postcode', methods=['POST'])
 def create():
