@@ -75,7 +75,7 @@ If sucessful, a 200 is returned with the data from the external API.
 
 -**GET (internal)** /postcode
 
-Get data entries for 
+Get data entries. 200 if successful.
 This request will pull all of the enteries for different postcodes that are in my API database,
 and return them.
 
