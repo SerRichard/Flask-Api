@@ -1,4 +1,4 @@
-# **Flask Api for c02-Intesity**
+# **Flask Api for c02-Intensity**
 
 With user registration, token authentication, and microservicing
 
