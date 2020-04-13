@@ -1,0 +1,9 @@
+Flask
+flask
+flask_login
+cassandra-driver
+flask_sqlalchemy
+passlib
+flask_httpauth
+itsdangerous
+requests
