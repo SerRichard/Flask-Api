@@ -4,10 +4,18 @@ With user registration, token authentication, and microservicing
 
 ## Installation and preparation: Linux users
 
-To install the requirements for running the app.
+Prepare your working environment
 
 ```
-pip3 install -r requrements.txt
+sudo apt update
+sudo apt install python3-pip
+sudo mkdir c02-app
+cd c02-app
+```
+Get the info from the repository
+
+```
+sudo wget https://github.com/SerRichard/Flask-Api.git
 ```
 
 Then set up your CQL database
