@@ -15,7 +15,9 @@ cd c02-app
 Get the info from the repository
 
 ```
-sudo wget https://github.com/SerRichard/Flask-Api.git
+wget -O requirements.txt https://raw.githubusercontent.com/SerRichard/Flask-Api/master/requirements.txt
+wget -O c02_api.py https://raw.githubusercontent.com/SerRichard/Flask-Api/master/c02_api.py
+wget -O c02.csv https://raw.githubusercontent.com/SerRichard/Flask-Api/master/c02.csv
 ```
 
 Then set up your CQL database
