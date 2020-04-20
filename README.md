@@ -36,8 +36,10 @@ sudo docker exec -it c02-docker cqlsh
 Now create the keyspace and table to store the API's data
 
 ```
->CREATE KEYSPACE c02 WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1};
->CREATE TABLE c02.stats (regionid int, name text, postcode text PRIMARY KEY, forecast text, indx text, Date text);
+CREATE KEYSPACE c02 WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1};
+CREATE TABLE c02.stats (regionid int, name text, postcode text PRIMARY KEY, forecast text, indx text, Date text);
+
+QUIT
 ```
 Returning to terminal, it is important to ensure the python code will try to connect to the correct location.
 Open the c02_api.py
