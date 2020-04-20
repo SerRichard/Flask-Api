@@ -1,1 +1,6 @@
-regionid,name,postcode,forecast,indx,date
+postcode,name,regionid,forecast,indx,date
+E14,London,12,98,low,20/04/2020
+E1, London, 12, 98, low, 20/04/2020
+ME16, South East England, 13, 177, moderate, 20/04/2020
+SA13, South Wales, 6, 141, low, 20/04/2020
+NE13, North East England, 3, 14, very low, 20/04/2020
