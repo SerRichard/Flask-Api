@@ -35,6 +35,9 @@ app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
 
+# URL Template
+c02_postcode_template = 'https://api.carbonintensity.org.uk/regional/postcode/{pstcd}'
+
 # Class model for SQLlite, table, with appropriate functions relating to the User.
 class User(db.Model):
 	__tablename__ = 'users'
@@ -43,7 +46,7 @@ class User(db.Model):
 	password_hash = db.Column(db.String(64))
 	# Use given p/word to generate a hash
 	def hash_password(self, password):
-		self.password_hash = pwd_context.encrypt(password)
+		self.password_hash = pwd_context.hash(password)
 	# Check a given password matches the stored hash against that User.
 	def verify_password(self, password):
 		return pwd_context.verify(password, self.password_hash)
@@ -51,6 +54,7 @@ class User(db.Model):
 	def generate_auth_token(self, expiration=1800):
 		s = Serializer(app.config['SECRET_KEY'], expires_in = expiration)
 		return s.dumps({'id': self.id})
+	
 	# Static method to check if the token is valid or expired
 	@staticmethod
 	def verify_auth_token(token):
@@ -67,10 +71,10 @@ class User(db.Model):
 @auth.verify_password
 def verify_password(username_or_token, password):
 	# try to verify by token first
-	user = User.verify_auth_token(token)
+	user = User.verify_auth_token(username_or_token)
 	# if not, authenticate with username and password
 	if not user:
-		user = User.query.filter_by(username=username).first()
+		user = User.query.filter_by(username=username_or_token).first()
 		if not user or not user.verify_password(password):
 			return False
 	g.user = user
@@ -94,16 +98,18 @@ def new_user():
 	user.hash_password(password)
 	db.session.add(user)
 	db.session.commit()
-	return (jsonify({user.username:'User registered'}), 201,
-		{'Location': url_for('get_user', id=user.id, _external=True)})
+	return jsonify({user.username:'User registered'}), 201,
 
 # Check if user is in database
-@app.route('/user/<username>', methods=['GET'])
-def find_user(username):
-	user = User.query.get(username)
-	if not user:
+@app.route('/user', methods=['GET'])
+def find_user():
+	username = request.json['username']
+	if username is None:
 		abort(400)
-	return jsonify({'User found': user.username})
+	if User.query.filter_by(username=username).first() is None:
+		abort(400)
+	user = User(username=username)
+	return jsonify({'User found': user.username}), 200
 
 # Protected endpoint. Requires username&password to get a token.
 @app.route('/token', methods=['GET'])
@@ -124,7 +130,6 @@ def profile():
 # Unprotected endpoint to view a specific entry in API
 @app.route('/c02/<postcode>', methods=['GET'])
 def internal_postcode(postcode):
-	results = []
 	resp = requests.get(c02_postcode_template.format(pstcd = postcode))
 	if not resp.ok:
 		abort(404) # Postcode not found
