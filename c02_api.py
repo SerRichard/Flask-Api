@@ -98,7 +98,7 @@ def new_user():
 		{'Location': url_for('get_user', id=user.id, _external=True)})
 
 # Check if user is in database
-@app.route('/user/<username>. methods=['GET])
+@app.route('/user/<username>', methods=['GET'])
 def find_user(username):
 	user = User.query.get(username)
 	if not user:
