@@ -67,7 +67,7 @@ From a different window requests can be sent.
 
 ## API Documentation
 
-**POST** /register 
+**POST** /user/register 
 
 Register a new user.
 The request must contain a JSON object that defines username and password.
@@ -77,10 +77,10 @@ being submitted, or if the username already exists.
 
 Example register:
 ```
-curl -i -H "Content-Type: application/json" -X POST -d '{"username":"sean","password":"student"}' ec2-35-171-189-126.compute-1.amazonaws.com/register
+curl -i -H "Content-Type: application/json" -X POST -d '{"username":"sean","password":"student"}' ec2-35-171-189-126.compute-1.amazonaws.com/user/register
 ```
 
-**GET** /token
+**GET** /user/token
 
 Use user information to get a token for accession protected app.route's.
 The request must contain the username and password.
@@ -91,63 +91,72 @@ supplied when accessing protect routes.
 
 Example get token:
 ```
-curl -u sean:student -i -X GET ec2-35-171-189-126.compute-1.amazonaws.com/token
+curl -u sean:student -i -X GET ec2-35-171-189-126.compute-1.amazonaws.com/user/token
 ```
 
-**GET (external)** /<postcode>
+**GET (internal)** /c02/postcodes
 
-Submit a curl GET request and the route shall be the first section of a standard UK postcode.
-This request tells the API to access an external API and get latest c02 intestity for the postcode.
-If sucessful, a 200 is returned with the data from the external API.
-If the external API does not understand the postcode parsed by the user, 400 is returned.
-
-Example external get:
-```
-curl -i ec2-35-171-189-126.compute-1.amazonaws.com/E1
-```
-
-**GET (internal)** /postcode
-
-Get data entries. 200 if successful.
-This request will pull all of the enteries for different postcodes that are in my API database,
+Get data entries. 200 if successful. 404 if bad postcode given.
+This request will pull all of the enteries for different postcodes that are in the API database,
 and return them.
 
 Example internal get:
 ```
-curl -i ec2-35-171-189-126.compute-1.amazonaws.com/postcode
+curl -i ec2-35-171-189-126.compute-1.amazonaws.com/c02/postcode
 ```
 
-**POST** /postcode
+**GET (internal)** /c02/<postcode>
+
+Get data entries. 200 if successful. 404 if bad postcode given.
+This request will pull all of the enteries for one specific postcode that is in the API database,
+and return them.
+
+Example internal a specific get:
+```
+curl -i ec2-35-171-189-126.compute-1.amazonaws.com/c02/E1
+```
+
+**GET (external)** /new/<postcode>
+
+Submit a curl GET request and the route shall be the first section of a standard UK postcode.
+This request tells the API to access an external API and get latest c02 intestity for the postcode.
+If sucessful, a 200 is returned with the data from the external API.
+404 if bad postcode given.
+
+Example external get:
+```
+curl -i ec2-35-171-189-126.compute-1.amazonaws.com/new/E1
+```
+
+**POST** /c02/postcode
 
 Post a new postcode. Protected with authentication. Requires token.
 This request posts a new entry to the API, and commits it to the database.
 This will return a 201 for successful requests.
+404 if bad postcode given.
 
 Example post entry:
 ```
-curl -i -H "Content-Type:application/json" -X POST -d '{"regionid":13,"name":"South East","postcode":"ME16","forecast":"215","indx":"moderate","date":"24-03-2020"}' --user eyJhbGciOiJIUzUxMiIsImV4cCI6MTU4NjUzMTczOCwiaWF0IjoxNTg2NTMxMTM4fQ.eyJpZCI6Mn0._8NNVOfxgnkcKorjv3x48NUnYqZucuJTEzS6FXcknTsDYcGJlge9QBzIsKOAZPCtBRVOQSVz7QEiQ9rBknP2Ug:x c2-35-171-189-126.compute-1.amazonaws.com/postcode
+curl -i -H "Content-Type:application/json" -X POST -d '{"regionid":13,"name":"South East","postcode":"ME16","forecast":"215","indx":"moderate","date":"24-03-2020"}' --user eyJhbGciOiJIUzUxMiIsImV4cCI6MTU4NjUzMTczOCwiaWF0IjoxNTg2NTMxMTM4fQ.eyJpZCI6Mn0._8NNVOfxgnkcKorjv3x48NUnYqZucuJTEzS6FXcknTsDYcGJlge9QBzIsKOAZPCtBRVOQSVz7QEiQ9rBknP2Ug:x c2-35-171-189-126.compute-1.amazonaws.com/c02/postcode
 ```
 
-**PUT** /postcode
+**PUT** /c02/postcode
 
 Update a postcode entry in the database. Protected with authentication. Requires token.
 This request allows the user to update an entry in API. Update forecast, indx and date.
-Successful put returns 200. Selecting 200 as this doesn't create a new resource,
-just modifies an existing one.
+Successful put returns 200. 404 if bad postcode given.
 
 Example put (update) entry:
 ```
-curl -i -H "Content-Type:application/json" -X PUT -d '{"postcode":"ME16","forecast":"458","indx":"High","date":"10-04-2020"}' --user eyJhbGciOiJIUzUxMiIsImV4cCI6MTU4NjUzMTczOCwiaWF0IjoxNTg2NTMxMTM4fQ.eyJpZCI6Mn0._8NNVOfxgnkcKorjv3x48NUnYqZucuJTEzS6FXcknTsDYcGJlge9QBzIsKOAZPCtBRVOQSVz7QEiQ9rBknP2Ug:x c2-35-171-189-126.compute-1.amazonaws.com/postcode
+curl -i -H "Content-Type:application/json" -X PUT -d '{"postcode":"ME16","forecast":"458","indx":"High","date":"10-04-2020"}' --user eyJhbGciOiJIUzUxMiIsImV4cCI6MTU4NjUzMTczOCwiaWF0IjoxNTg2NTMxMTM4fQ.eyJpZCI6Mn0._8NNVOfxgnkcKorjv3x48NUnYqZucuJTEzS6FXcknTsDYcGJlge9QBzIsKOAZPCtBRVOQSVz7QEiQ9rBknP2Ug:x c2-35-171-189-126.compute-1.amazonaws.com/c02/postcode
 ```
 
-**DELETE** /postcode
+**DELETE** /c02/postcode
 
 Remove a postcode entry from the database. This may be done if duplicate entries are found.
 This request is protected with authenticion and requires a token. Only takes one entry
-(the postcode) in the JSON object. Returning a 200 on success. Again, this does not create
-a new resource, but removes an existing one, so saying Okay is sufficient.
-
+(the postcode) in the JSON object. Returning a 200 on success. 404 if bad postcode given.
 Example delete entry:
 ```
-curl -i -H "Content-Type:application/json" -X DELETE -d '{"postcode":"E1"}' --user eyJhbGciOiJIUzUxMiIsImV4cCI6MTU4NjUzMjQyNywiaWF0IjoxNTg2NTMxODI3fQ.eyJpZCI6Mn0.wEWtd3zSZb7efogusUE3JS2qmwW2PB0VbetcNb7jJOTqYo30RZXX7hL_7-dw2JODcG9z7zYNrdT3NUh6izIrEA:x c2-35-171-189-126.compute-1.amazonaws.com/postcode
+curl -i -H "Content-Type:application/json" -X DELETE -d '{"postcode":"E1"}' --user eyJhbGciOiJIUzUxMiIsImV4cCI6MTU4NjUzMjQyNywiaWF0IjoxNTg2NTMxODI3fQ.eyJpZCI6Mn0.wEWtd3zSZb7efogusUE3JS2qmwW2PB0VbetcNb7jJOTqYo30RZXX7hL_7-dw2JODcG9z7zYNrdT3NUh6izIrEA:x c2-35-171-189-126.compute-1.amazonaws.com/c02/postcode
 ```
