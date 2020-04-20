@@ -102,7 +102,7 @@ and return them.
 
 Example internal get:
 ```
-curl -i ec2-35-171-189-126.compute-1.amazonaws.com/c02/postcode
+curl -i ec2-35-171-189-126.compute-1.amazonaws.com/c02/postcodes
 ```
 
 **GET (internal)** /c02/<postcode>
