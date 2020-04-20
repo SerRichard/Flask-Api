@@ -38,7 +38,7 @@ Now create the keyspace and table to store the API's data
 ```
 CREATE KEYSPACE c02 WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1};
 CREATE TABLE c02.stats (postcode text PRIMARY KEY, name text, regionid int, forecast text, indx text, Date text);
-COPY c02.stats(postcode,name,regionid,forecast,indx,date) FROM '/home/c02-api/c02.csv' WITH DELIMITER=',' AND HEADER=True;
+COPY c02.stats(postcode,name,regionid,forecast,indx,date) FROM '/home/c02.csv' WITH DELIMITER=',' AND HEADER=True;
 
 
 QUIT
