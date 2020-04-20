@@ -61,7 +61,7 @@ Now we have the requirements installed and the database set up, the server is re
 Set up a docker, and run the server via a docker.
 ```
 sudo docker build . --tag=c02_api:v1
-sudo docker run -p 8080:8080 c02_api:v1
+sudo docker run -p 80:80 c02_api:v1
 ```
 From a different window requests can be sent.
 
