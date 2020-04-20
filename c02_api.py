@@ -82,7 +82,7 @@ def hello():
 	return('<h1>Hello, and welcome to my restful c02 app: Visit /register to register<h1>')
 
 # Route to support registration
-@app.route('/user/register', methods=['POST'])
+@app.route('/register', methods=['POST'])
 def new_user():
 	username = request.json['username']
 	password = request.json['password']
@@ -96,6 +96,14 @@ def new_user():
 	db.session.commit()
 	return (jsonify({user.username:'User registered'}), 201,
 		{'Location': url_for('get_user', id=user.id, _external=True)})
+
+# Check if user is in database
+@app.route('/user/<username>. methods=['GET])
+def find_user(username):
+	user = User.query.get(username)
+	if not user:
+		abort(400)
+	return jsonify({'User found': user.username})
 
 # Protected endpoint. Requires username&password to get a token.
 @app.route('/token', methods=['GET'])
@@ -121,7 +129,7 @@ def internal_postcode(postcode):
 	if not resp.ok:
 		abort(404) # Postcode not found
 	else:
-	tuples = session.execute("""Select * From c02.stats WHERE postcode='{}'""".format(postcode))
+		tuples = session.execute("""Select * From c02.stats WHERE postcode='{}'""".format(postcode))
 		results = []
 		for x in tuples:
 			results.append({"regionid":x.regionid,"name":x.name,"postcode":x.postcode,"forecast":x.forecast,"indx":x.indx,"date":x.date})
@@ -169,7 +177,7 @@ def delete():
 	resp = requests.get(c02_postcode_template.format(pstcd = postcode))
 	if not resp.ok:
 		abort(404) # Postcode not found
-        else:
+	else:
 		session.execute("""DELETE FROM c02.stats WHERE postcode='{}'""".format(request.json['postcode']))
 		return jsonify({'message': 'deleted: /c02/{}'.format(request.json['postcode'])}), 200
 
