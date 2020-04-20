@@ -113,37 +113,65 @@ def profile():
 		results.append({"regionid":x.regionid,"name":x.name,"postcode":x.postcode,"forecast":x.forecast,"indx":x.indx,"date":x.date})
 	return jsonify(results), 200
 
-# Unprotected endpoint to retrieve data for a specific postcode
+# Unprotected endpoint to view a specific entry in API
+@app.route('/postcode/<postcode>', methods=['GET'])
+def internal_postcode(postcode):
+	results = []
+	resp = requests.get(c02_postcode_template.format(pstcd = postcode))
+	if not resp.ok:
+		abort(404) # Postcode not found
+	else:
+	tuples = session.execute("""Select * From c02.stats WHERE postcode='{}'""".format(postcode))
+		results = []
+		for x in tuples:
+			results.append({"regionid":x.regionid,"name":x.name,"postcode":x.postcode,"forecast":x.forecast,"indx":x.indx,"date":x.date})
+		return jsonify(results), 200
+
+# Unprotected endpoint to retrieve data for a new postcode
 @app.route('/<postcode>', methods=['GET'])
 def external_postcode(postcode):
-	c02_postcode_template = 'https://api.carbonintensity.org.uk/regional/postcode/{pstcd}'
 	resp = requests.get(c02_postcode_template.format(pstcd = postcode))
-	if resp.ok:
-		c02 = resp.json()
-		return jsonify(c02), 200 # Successfully returning requested data
+	if not resp.ok:
+		abort(404) # Postcode not found
 	else:
-		print(resp.reason), 400 # If there is a problem with the external API, bad required
+		c02 = resp.json()
+		return jsonify(c02), 200
 
 # Protected endpoint (token required) to post a new entry to the database
 @app.route('/postcode', methods=['POST'])
 @auth.login_required
 def create():
-	session.execute("""INSERT INTO c02.stats(regionid,name,postcode,forecast,indx,date) VALUES({},'{}','{}','{}','{}','{}')""".format(int(request.json['regionid']),request.json['name'],request.json['postcode'],request.json['forecast'],request.json['indx'],request.json['date']))
-	return jsonify({'message': 'created: /record/{}'.format(request.json['postcode'])}), 201
+	postcode = request.json['postcode']
+	resp = requests.get(c02_postcode_template.format(pstcd = postcode))
+	if not resp.ok:
+		abort(404) # Postcode not found
+	else:
+		session.execute("""INSERT INTO c02.stats(regionid,name,postcode,forecast,indx,date) VALUES({},'{}','{}','{}','{}','{}')""".format(int(request.json['regionid']),request.json['name'],request.json['postcode'],request.json['forecast'],request.json['indx'],request.json['date']))
+		return jsonify({'message': 'created: /record/{}'.format(request.json['postcode'])}), 201
 
 # Protected endpoint (token required) to update an entry in the database
 @app.route('/postcode', methods=['PUT'])
 @auth.login_required
 def update():
-	session.execute("""UPDATE c02.stats SET forecast= '{}', indx= '{}', date= '{}' WHERE postcode= '{}'""".format(request.json['forecast'],request.json['indx'],request.json['date'],request.json['postcode']))
-	return jsonify({'message': 'updated: /record/{}'.format(request.json['postcode'])}), 200
+	postcode = request.json['postcode']
+	resp = requests.get(c02_postcode_template.format(pstcd = postcode))
+	if not resp.ok:
+		abort(404) # Postcode not found
+	else:
+		session.execute("""UPDATE c02.stats SET forecast= '{}', indx= '{}', date= '{}' WHERE postcode= '{}'""".format(request.json['forecast'],request.json['indx'],request.json['date'],request.json['postcode']))
+		return jsonify({'message': 'updated: /record/{}'.format(request.json['postcode'])}), 200
 
 # Protected endpoint (token required) to delete an entry from the database
 @app.route('/postcode', methods=['DELETE'])
 @auth.login_required
 def delete():
-	session.execute("""DELETE FROM c02.stats WHERE postcode='{}'""".format(request.json['postcode']))
-	return jsonify({'message': 'deleted: /records/{}'.format(request.json['postcode'])}), 200
+	postcode = request.json['postcode']
+	resp = requests.get(c02_postcode_template.format(pstcd = postcode))
+	if not resp.ok:
+		abort(404) # Postcode not found
+        else:
+		session.execute("""DELETE FROM c02.stats WHERE postcode='{}'""".format(request.json['postcode']))
+		return jsonify({'message': 'deleted: /records/{}'.format(request.json['postcode'])}), 200
 
 if __name__ == '__main__':
 	# if the SQL db has not previously been initialized, create all
