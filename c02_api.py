@@ -82,7 +82,7 @@ def hello():
 	return('<h1>Hello, and welcome to my restful c02 app: Visit /register to register<h1>')
 
 # Route to support registration
-@app.route('/register', methods=['POST'])
+@app.route('/user/register', methods=['POST'])
 def new_user():
 	username = request.json['username']
 	password = request.json['password']
@@ -105,7 +105,7 @@ def get_auth_token():
 	return jsonify({'token':token.decode('ascii'), 'duration': 1800 }), 200
 
 # Unprotected endpoint to view entries in API
-@app.route('/postcode', methods=['GET'])
+@app.route('/c02/postcodes', methods=['GET'])
 def profile():
 	tuples = session.execute("""Select * From c02.stats""")
 	results = []
@@ -114,7 +114,7 @@ def profile():
 	return jsonify(results), 200
 
 # Unprotected endpoint to view a specific entry in API
-@app.route('/postcode/<postcode>', methods=['GET'])
+@app.route('/c02/<postcode>', methods=['GET'])
 def internal_postcode(postcode):
 	results = []
 	resp = requests.get(c02_postcode_template.format(pstcd = postcode))
@@ -128,7 +128,7 @@ def internal_postcode(postcode):
 		return jsonify(results), 200
 
 # Unprotected endpoint to retrieve data for a new postcode
-@app.route('/<postcode>', methods=['GET'])
+@app.route('/new/<postcode>', methods=['GET'])
 def external_postcode(postcode):
 	resp = requests.get(c02_postcode_template.format(pstcd = postcode))
 	if not resp.ok:
@@ -138,7 +138,7 @@ def external_postcode(postcode):
 		return jsonify(c02), 200
 
 # Protected endpoint (token required) to post a new entry to the database
-@app.route('/postcode', methods=['POST'])
+@app.route('/c02/postcode', methods=['POST'])
 @auth.login_required
 def create():
 	postcode = request.json['postcode']
@@ -147,10 +147,10 @@ def create():
 		abort(404) # Postcode not found
 	else:
 		session.execute("""INSERT INTO c02.stats(regionid,name,postcode,forecast,indx,date) VALUES({},'{}','{}','{}','{}','{}')""".format(int(request.json['regionid']),request.json['name'],request.json['postcode'],request.json['forecast'],request.json['indx'],request.json['date']))
-		return jsonify({'message': 'created: /record/{}'.format(request.json['postcode'])}), 201
+		return jsonify({'message': 'created: /c02/{}'.format(request.json['postcode'])}), 201
 
 # Protected endpoint (token required) to update an entry in the database
-@app.route('/postcode', methods=['PUT'])
+@app.route('/c02/postcode', methods=['PUT'])
 @auth.login_required
 def update():
 	postcode = request.json['postcode']
@@ -159,10 +159,10 @@ def update():
 		abort(404) # Postcode not found
 	else:
 		session.execute("""UPDATE c02.stats SET forecast= '{}', indx= '{}', date= '{}' WHERE postcode= '{}'""".format(request.json['forecast'],request.json['indx'],request.json['date'],request.json['postcode']))
-		return jsonify({'message': 'updated: /record/{}'.format(request.json['postcode'])}), 200
+		return jsonify({'message': 'updated: /c02/{}'.format(request.json['postcode'])}), 200
 
 # Protected endpoint (token required) to delete an entry from the database
-@app.route('/postcode', methods=['DELETE'])
+@app.route('/c02/postcode', methods=['DELETE'])
 @auth.login_required
 def delete():
 	postcode = request.json['postcode']
@@ -171,7 +171,7 @@ def delete():
 		abort(404) # Postcode not found
         else:
 		session.execute("""DELETE FROM c02.stats WHERE postcode='{}'""".format(request.json['postcode']))
-		return jsonify({'message': 'deleted: /records/{}'.format(request.json['postcode'])}), 200
+		return jsonify({'message': 'deleted: /c02/{}'.format(request.json['postcode'])}), 200
 
 if __name__ == '__main__':
 	# if the SQL db has not previously been initialized, create all
