@@ -16,10 +16,10 @@ cd c02-app
 Get the info from the repository
 
 ```
-wget -O requirements.txt https://raw.githubusercontent.com/SerRichard/Flask-Api/master/requirements.txt
-wget -O Dockerfile https://raw.githubusercontent.com/SerRichard/Flask-Api/master/Dockerfile
-wget -O c02_api.py https://raw.githubusercontent.com/SerRichard/Flask-Api/master/c02_api.py
-wget -O c02.csv https://raw.githubusercontent.com/SerRichard/Flask-Api/master/c02.csv
+sudo wget -O requirements.txt https://raw.githubusercontent.com/SerRichard/Flask-Api/master/requirements.txt
+sudo wget -O Dockerfile https://raw.githubusercontent.com/SerRichard/Flask-Api/master/Dockerfile
+sudo wget -O c02_api.py https://raw.githubusercontent.com/SerRichard/Flask-Api/master/c02_api.py
+sudo wget -O c02.csv https://raw.githubusercontent.com/SerRichard/Flask-Api/master/c02.csv
 ```
 
 Then set up your CQL database
