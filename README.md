@@ -9,6 +9,7 @@ Prepare your working environment
 ```
 sudo apt update
 sudo apt install python3-pip
+sudo apt install docker.io
 sudo mkdir c02-app
 cd c02-app
 ```
@@ -16,6 +17,7 @@ Get the info from the repository
 
 ```
 wget -O requirements.txt https://raw.githubusercontent.com/SerRichard/Flask-Api/master/requirements.txt
+wget -O Dockerfile https://raw.githubusercontent.com/SerRichard/Flask-Api/master/Dockerfile
 wget -O c02_api.py https://raw.githubusercontent.com/SerRichard/Flask-Api/master/c02_api.py
 wget -O c02.csv https://raw.githubusercontent.com/SerRichard/Flask-Api/master/c02.csv
 ```
@@ -52,9 +54,10 @@ Now we have the requirements installed and the database set up, the server is re
 
 ## Running
 
-Run the server
+Set up a docker, and run the server via a docker.
 ```
-sudo python3 c02_api.py
+sudo docker build . --tag=c02_api:v1
+sudo docker run -p 8080:8080 c02_api:v1
 ```
 From a different window requests can be sent.
 
