@@ -105,7 +105,7 @@ Example internal get:
 curl -i ec2-35-171-189-126.compute-1.amazonaws.com/c02/postcodes
 ```
 
-**GET (internal)** /c02/<postcode>
+**GET (internal)** /c02/**postcode**
 
 Get data entries. 200 if successful. 404 if bad postcode given.
 This request will pull all of the enteries for one specific postcode that is in the API database,
@@ -116,7 +116,7 @@ Example internal a specific get:
 curl -i ec2-35-171-189-126.compute-1.amazonaws.com/c02/E1
 ```
 
-**GET (external)** /new/<postcode>
+**GET (external)** /new/**postcode**
 
 Submit a curl GET request and the route shall be the first section of a standard UK postcode.
 This request tells the API to access an external API and get latest c02 intestity for the postcode.
