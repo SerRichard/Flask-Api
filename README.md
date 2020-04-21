@@ -2,6 +2,9 @@
 
 With user registration, token authentication, and microservicing
 
+**note:** This API will only recieve the first segment of a UK standard postcode.
+For example. E1 3BB, only E1, drop the second segment.
+
 ## Installation and preparation: Linux users
 
 Prepare your working environment
